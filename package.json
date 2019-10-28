@@ -1,0 +1,22 @@
+{
+  "name": "@casret/dedupe",
+  "version": "0.0.1",
+  "description": "Dedupe utilities for pipedream",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/casret/dedupe.git"
+  },
+  "keywords": [
+    "pipedream"
+  ],
+  "author": "Giao Phan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/casret/dedupe/issues"
+  },
+  "homepage": "https://github.com/casret/dedupe#readme"
+}
