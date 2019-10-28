@@ -1,6 +1,6 @@
 {
   "name": "@casret/dedupe",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Dedupe utilities for pipedream",
   "main": "index.js",
   "scripts": {
@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/casret/dedupe/issues"
   },
-  "homepage": "https://github.com/casret/dedupe#readme"
+  "homepage": "https://github.com/casret/dedupe#readme",
+  "devDependencies": {
+    "jest": "^24.9.0"
+  }
 }

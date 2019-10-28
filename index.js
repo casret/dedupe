@@ -1,6 +1,6 @@
-export const SortedItems = Symbol("SortedItems")
-export const SortedKeys = Symbol("SortedKeys")
-export const Unsorted = Symbol("Unsorted")
+const SortedItems = Symbol("SortedItems")
+const SortedKeys = Symbol("SortedKeys")
+const Unsorted = Symbol("Unsorted")
 
 class DedupeError extends Error {
   constructor(message) {
@@ -9,7 +9,7 @@ class DedupeError extends Error {
   }
 }
 
-export function dedupe(strategy, items, key_cache, key_mapper = item => item.id) {
+function dedupe(strategy, items, key_cache, key_mapper = item => item.id) {
   const isArray = Array.isArray(items)
   if (!isArray) {
     items = [items]
@@ -20,7 +20,7 @@ export function dedupe(strategy, items, key_cache, key_mapper = item => item.id)
     const type = typeof key
     if (type == "string") {
       if (key.length > 64) {
-        console.log(`Key too long: ${item} was mapped to ${key}`)
+        console.error(`Key too long: ${item} was mapped to ${key}`)
         throw new DedupeError("Dedup error, check logs")
       }
     } else if (type != "number") {
@@ -29,6 +29,7 @@ export function dedupe(strategy, items, key_cache, key_mapper = item => item.id)
     }
     return key
   })
+
 
   // deal with the degenerate cases
   if (!key_cache || !Array.isArray(key_cache)) {
@@ -42,19 +43,20 @@ export function dedupe(strategy, items, key_cache, key_mapper = item => item.id)
       (_obj, index) => current_keys[index] > key_cache[0]
     )
   } else if (strategy == SortedItems) {
-    const index = current_keys.find(key => key == key_cache[0])
+    const index = current_keys.findIndex(key => key == key_cache[0])
     if (index) items = items.slice(0, index)
     key_cache = current_keys
   } else {
     // strategy UNSORTED
-    const key_cache = key_cache.reduce(
-      (acc, obj) => (acc[obj] = true)
+    const key_map = key_cache.reduce(
+      (acc, obj) => {acc[obj] = true; return acc},
+      {}
     )
     const undropped_keys = []
 
     // NB: filter with a side-effect
     items = items.filter((_obj, index) => {
-      if (!(current_keys[index] in key_cache)) {
+      if (!(current_keys[index] in key_map)) {
         undropped_keys.push(current_keys[index])
         return true
       }
@@ -91,4 +93,8 @@ export function dedupe(strategy, items, key_cache, key_mapper = item => item.id)
   }
 
   return {items, key_cache}
+}
+
+module.exports = {
+  SortedItems, SortedKeys, Unsorted, dedupe
 }
