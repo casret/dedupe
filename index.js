@@ -44,7 +44,7 @@ function dedupe(strategy, items, key_cache, key_mapper = item => item.id) {
     )
   } else if (strategy == SortedItems) {
     const index = current_keys.findIndex(key => key == key_cache[0])
-    if (index) items = items.slice(0, index)
+    if (index > -1) items = items.slice(0, index)
     key_cache = current_keys
   } else {
     // strategy UNSORTED
