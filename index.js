@@ -1,6 +1,8 @@
-const SortedItems = Symbol("SortedItems")
-const SortedKeys = Symbol("SortedKeys")
-const Unsorted = Symbol("Unsorted")
+const Strategies = {
+  SortedItems: Symbol("SortedItems"),
+  SortedKeys: Symbol("SortedKeys"),
+  Unsorted: Symbol("Unsorted"),
+}
 
 class DedupeError extends Error {
   constructor(message) {
@@ -9,7 +11,22 @@ class DedupeError extends Error {
   }
 }
 
-function dedupe(strategy, items, key_cache, key_mapper = item => item.id) {
+function dedupe(items, opts) {
+  const strategy = opts.strategy || Strategies.SortedItems
+  if (strategy !== Strategies.SortedItems &&
+    strategy !== Strategies.SortedKeys &&
+    strategy !== Strategies.Unsorted)
+    throw new DedupeError("Unknown strategy passed")
+
+  const key_mapper = opts.key_mapper || (item => item.id)
+  let key_cache
+  if (opts.auto_checkpoint) {
+    key_cache = opts.auto_checkpoint.$checkpoint
+  }
+
+  // Allow overriding the auto_checkpoint if you want
+  key_cache = opts.key_cache || key_cache
+
   const isArray = Array.isArray(items)
   if (!isArray) {
     items = [items]
@@ -37,12 +54,12 @@ function dedupe(strategy, items, key_cache, key_mapper = item => item.id) {
     items = []
   } else if (key_cache.length == 0) {
     key_cache = current_keys
-  } else if (strategy == SortedKeys) {
+  } else if (strategy == Strategies.SortedKeys) {
     key_cache = key_cache.concat(current_keys)
     items = items.filter(
       (_obj, index) => current_keys[index] > key_cache[0]
     )
-  } else if (strategy == SortedItems) {
+  } else if (strategy == Strategies.SortedItems) {
     const index = current_keys.findIndex(key => key == key_cache[0])
     if (index > -1) items = items.slice(0, index)
     key_cache = current_keys
@@ -62,7 +79,13 @@ function dedupe(strategy, items, key_cache, key_mapper = item => item.id) {
       }
     })
 
-    // TODO: heuristic on add order
+    // If current_keys[0] was already in the key_cache, it's more likely
+    // that the array is sorted from oldest to youngest, so we'll reverse the order
+    // of how we insert them
+    if(undropped_keys.length > 0 && undropped_keys[0] != current_keys[0]) {
+      undropped_keys.reverse()
+    }
+
     key_cache = undropped_keys.concat(key_cache)
   }
 
@@ -70,7 +93,7 @@ function dedupe(strategy, items, key_cache, key_mapper = item => item.id) {
   // to handle the degenerate cases correctly)
   if (key_cache.length > 0) {
     switch (strategy) {
-      case SortedKeys:
+      case Strategies.SortedKeys:
         key_cache = [
           key_cache.reduce(
             (acc, obj) => (obj > acc ? obj : acc),
@@ -78,10 +101,10 @@ function dedupe(strategy, items, key_cache, key_mapper = item => item.id) {
           ),
         ]
         break
-      case SortedItems:
+      case Strategies.SortedItems:
         key_cache = key_cache.slice(0, 1)
         break
-      case Unsorted:
+      case Strategies.Unsorted:
         key_cache = key_cache.slice(0, 1000)
         break
     }
@@ -92,9 +115,13 @@ function dedupe(strategy, items, key_cache, key_mapper = item => item.id) {
     items = items[0]
   }
 
+  if (opts.auto_checkpoint) {
+    opts.auto_checkpoint.$checkpoint = key_cache
+  }
+
   return {items, key_cache}
 }
 
 module.exports = {
-  SortedItems, SortedKeys, Unsorted, dedupe
+  dedupe, Strategies
 }

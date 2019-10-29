@@ -1,6 +1,6 @@
 {
   "name": "@casret/dedupe",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Dedupe utilities for pipedream",
   "main": "index.js",
   "scripts": {
