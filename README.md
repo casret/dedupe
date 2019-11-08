@@ -2,11 +2,18 @@
 Dedupe utility functions for pipedream
 
 ## Usage
+
+This will dedupe items that are pre-sorted from most to least recent, and contain an `id`
+key.  It will also automatically use the scoped step $checkpoint to retreive and store
+the results of the last dedupe run.
+
 ```
 const {dedupe, Strategies} = require ("@casret/dedupe")
 
-return dudupe(steps.foo.$return_value, {auto_checkpoint: this}).items
+return dedupe(steps.foo.$return_value, {auto_checkpoint: this}).items
 ```
+
+The API exposes other methods of deduping.
 
 ## API
 
@@ -43,7 +50,9 @@ One of the symbols from the Strategies object
 
 Type: function
 
-This function maps the items to a key that uniquely identifies the item.  It defaults to `(item) => item.id`.  A key should be a number or a string of length of 64 or less.
+This function maps the items to a key that uniquely identifies the item.  It defaults to `(item) => item.id`.  A key should be a number or a string of length of 64 or less.  If your keys are longer, consider using a hash function:  
+`item => require('crypto').createHash('md5').update(item.long_string).digest("hex")`
+
 
 ##### key_cache
 

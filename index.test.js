@@ -61,6 +61,12 @@ describe("When passing in your own key mapper", () => {
     expect(items).toEqual([{id: "a", sec:3}])
     expect(key_cache).toEqual([3])
   })
+
+  test("can use a crypto hash", () => {
+    const { items, key_cache } = dedupe([{id: "a"}, {id: "b"}, {id:"c"}], {key_cache: ['92eb5ffee6ae2fec3ad71c777531578f'], key_mapper: item => require('crypto').createHash('md5').update(item.id).digest("hex")})
+    expect(items).toEqual([{id: "a"}])
+    expect(key_cache).toEqual(['0cc175b9c0f1b6a831c399e269772661'])
+  })
 })
 
 test("Should throw an exception if you use a bad strategy", () => {
