@@ -12,7 +12,9 @@ class DedupeError extends Error {
 }
 
 function dedupe(items, opts) {
-  const strategy = opts.strategy || Strategies.SortedItems
+  // If the strategy passed in null (which is easy if use a bad key on Strategies)
+  // then we should raise instead of defaulting
+  const strategy = ('strategy' in opts) ? opts.strategy : Strategies.SortedItems
   if (strategy !== Strategies.SortedItems &&
     strategy !== Strategies.SortedKeys &&
     strategy !== Strategies.Unsorted)

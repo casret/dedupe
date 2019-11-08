@@ -62,3 +62,7 @@ describe("When passing in your own key mapper", () => {
     expect(key_cache).toEqual([3])
   })
 })
+
+test("Should throw an exception if you use a bad strategy", () => {
+  expect(() => dedupe([], {strategy: Strategies.NoSuchStrategy})).toThrow()
+})
